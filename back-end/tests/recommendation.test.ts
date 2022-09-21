@@ -3,7 +3,7 @@ import app from "../src/app"
 import { prisma } from "../src/database"
 import * as recommendationFactory from './factories/recommendationFactory'
 
-beforeAll(async () => {
+beforeEach(async () => {
     await prisma.$executeRaw`TRUNCATE TABLE "recommendations"`
 })
 
@@ -12,8 +12,10 @@ describe('POST /recommendations', () => {
         const recommendation = recommendationFactory.createRecommendation()
 
         const result = await supertest(app).post('/recommendations').send(recommendation)
+        const after = await recommendationFactory.findRecommendation(recommendation.name)
 
         expect(result.status).toBe(201)
+        expect(after).not.toBeNull()
     })
 
     it('given a malformed link, return 422', async () => {
@@ -41,8 +43,10 @@ describe('POST /recommendations/:id/upvote', () => {
         const recommendation = await recommendationFactory.insertRecommendation()
 
         const result = await supertest(app).post(`/recommendations/${recommendation.id}/upvote`)
+        const after = await recommendationFactory.findRecommendation(recommendation.name)
 
         expect(result.status).toBe(200)
+        expect(after!.score).toBeGreaterThan(recommendation.score)
     })
 
     it('given a not found id, return 404', async () => {
@@ -57,8 +61,10 @@ describe('POST /recommendations/:id/downvote', () => {
         const recommendation = await recommendationFactory.insertRecommendation()
 
         const result = await supertest(app).post(`/recommendations/${recommendation.id}/downvote`)
+        const after = await recommendationFactory.findRecommendation(recommendation.name)
 
         expect(result.status).toBe(200)
+        expect(after!.score).toBeLessThan(recommendation.score)
     })
 
     it('given a not found id, return 404', async () => {
@@ -90,7 +96,7 @@ describe('GET /recommendations', () => {
     })
 })
 
-describe('GET /recommendations', () => {
+describe('GET /recommendations/:id', () => {
     it('given a correct recommendation object on get, return 200', async () => {
         const recommendation = await recommendationFactory.insertRecommendation()
 
@@ -109,6 +115,8 @@ describe('GET /recommendations', () => {
 
 describe('GET /recommendations/random', () => {
     it('given a correct random recommendation object, return 200', async () => {
+        await recommendationFactory.recommendationsLimit10()
+
         const result = await supertest(app).get(`/recommendations/random`)
 
         expect(result.status).toBe(200)
@@ -116,8 +124,6 @@ describe('GET /recommendations/random', () => {
     })
 
     it('given a get and not found any recommendation on db, return 404', async () => {
-        await recommendationFactory.resetRecommendations()
-
         const result = await supertest(app).get(`/recommendations/random`)
 
         expect(result.status).toBe(404)
