@@ -115,6 +115,18 @@ describe('GET /recommendations/random', () => {
     })
 })
 
+describe('GET /recommendations/top/:amount', () => {
+    it('given a array of objects ordered by score passing amount, return 200', async () => {
+        const recommendations = await recommendationFactory.recommendationTop(10)
+
+        const result = await supertest(app).get(`/recommendations/top/${10}`)
+
+        expect(result.status).toBe(200)
+        expect(result.body).toBeInstanceOf(Array)
+        expect(result.body).toEqual(expect.objectContaining(recommendations))
+    })
+})
+
 afterAll(async () => {
     await prisma.$disconnect()
 })
