@@ -12,6 +12,7 @@ describe('POST /recommendations', () => {
         const recommendation = recommendationFactory.createRecommendation()
 
         const result = await supertest(app).post('/recommendations').send(recommendation)
+
         expect(result.status).toBe(201)
     })
 
@@ -19,6 +20,7 @@ describe('POST /recommendations', () => {
         const recommendation = recommendationFactory.wrongRecommendationLink()
 
         const result = await supertest(app).post('/recommendations').send(recommendation)
+
         expect(result.status).toBe(422)
     })
 
@@ -29,6 +31,7 @@ describe('POST /recommendations', () => {
             name: recommendation.name,
             youtubeLink: recommendation.youtubeLink
         })
+
         expect(result.status).toBe(409)
     })
 })
@@ -38,11 +41,13 @@ describe('POST /recommendations/:id/upvote', () => {
         const recommendation = await recommendationFactory.insertRecommendation()
 
         const result = await supertest(app).post(`/recommendations/${recommendation.id}/upvote`)
+
         expect(result.status).toBe(200)
     })
 
     it('given a not found id, return 404', async () => {
         const result = await supertest(app).post(`/recommendations/-1/upvote`)
+
         expect(result.status).toBe(404)
     })
 })
@@ -52,11 +57,13 @@ describe('POST /recommendations/:id/downvote', () => {
         const recommendation = await recommendationFactory.insertRecommendation()
 
         const result = await supertest(app).post(`/recommendations/${recommendation.id}/downvote`)
+
         expect(result.status).toBe(200)
     })
 
     it('given a not found id, return 404', async () => {
         const result = await supertest(app).post(`/recommendations/-1/downvote`)
+
         expect(result.status).toBe(404)
     })
 })
@@ -71,6 +78,23 @@ describe('GET /recommendations', () => {
         expect(result.body).toBeInstanceOf(Array)
         expect(result.body).toEqual(expect.objectContaining(recommendations))
         expect(result.body.length).toBeLessThanOrEqual(10)
+    })
+})
+
+describe('GET /recommendations', () => {
+    it('given a correct recommendation object on get, return 200', async () => {
+        const recommendation = await recommendationFactory.insertRecommendation()
+
+        const result = await supertest(app).get(`/recommendations/${recommendation.id}`)
+
+        expect(result.status).toBe(200)
+        expect(result.body).toEqual(expect.objectContaining(recommendation))
+    })
+
+    it('given a not found id, return 404', async () => {
+        const result = await supertest(app).get(`/recommendations/-1`)
+
+        expect(result.status).toBe(404)
     })
 })
 
