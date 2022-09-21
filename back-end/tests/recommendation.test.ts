@@ -66,6 +66,15 @@ describe('POST /recommendations/:id/downvote', () => {
 
         expect(result.status).toBe(404)
     })
+
+    it('given a downvote less than -5 delete a recommendation, return 404', async () => {
+        const recommendationId = await recommendationFactory.recommendationDeleteDownvote()
+
+        await supertest(app).post(`/recommendations/${recommendationId}/downvote`)
+        const result = await supertest(app).post(`/recommendations/${recommendationId}/downvote`)
+
+        expect(result.status).toBe(404)
+    })
 })
 
 describe('GET /recommendations', () => {

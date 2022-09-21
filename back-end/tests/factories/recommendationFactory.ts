@@ -47,3 +47,11 @@ export async function recommendationTop(qtd: number): Promise<Recommendation[]> 
 
     return recommendations
 }
+
+export async function recommendationDeleteDownvote(): Promise<number> {
+    const recommendation = await insertRecommendation()
+
+    await prisma.recommendation.update({ where: { id: recommendation.id }, data: { score: -6 } })
+
+    return recommendation.id
+}
