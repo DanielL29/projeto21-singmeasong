@@ -98,6 +98,23 @@ describe('GET /recommendations', () => {
     })
 })
 
+describe('GET /recommendations/random', () => {
+    it('given a correct random recommendation object, return 200', async () => {
+        const result = await supertest(app).get(`/recommendations/random`)
+
+        expect(result.status).toBe(200)
+        expect(result.body).toBeInstanceOf(Object)
+    })
+
+    it('given a get and not found any recommendation on db, return 404', async () => {
+        await recommendationFactory.resetRecommendations()
+
+        const result = await supertest(app).get(`/recommendations/random`)
+
+        expect(result.status).toBe(404)
+    })
+})
+
 afterAll(async () => {
     await prisma.$disconnect()
 })

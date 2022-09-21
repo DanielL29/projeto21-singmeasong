@@ -37,3 +37,7 @@ export async function recommendationsLimit10(): Promise<Recommendation[]> {
 
     return recommendations
 }
+
+export async function resetRecommendations() {
+    await prisma.$executeRaw`TRUNCATE TABLE "recommendations"`
+}
