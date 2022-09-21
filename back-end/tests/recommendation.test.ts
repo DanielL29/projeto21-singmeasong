@@ -33,6 +33,20 @@ describe('POST /recommendations', () => {
     })
 })
 
+describe('POST /recommendations/:id/upvote', () => {
+    it('given a found id, return 200', async () => {
+        const recommendation = await recommendationFactory.insertRecommendation()
+
+        const result = await supertest(app).post(`/recommendations/${recommendation.id}/upvote`)
+        expect(result.status).toBe(200)
+    })
+
+    it('given a not found id, return 404', async () => {
+        const result = await supertest(app).post(`/recommendations/-1/upvote`)
+        expect(result.status).toBe(404)
+    })
+})
+
 afterAll(async () => {
     await prisma.$disconnect()
 })
