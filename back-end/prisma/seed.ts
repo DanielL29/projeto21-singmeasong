@@ -19,9 +19,9 @@ async function main() {
         score: -30
     }
 
-    await prisma.recommendation.upsert({ where: { name: "On Top of The World" }, update: { ...onTopOfTheWorld }, create: { ...onTopOfTheWorld } })
-    await prisma.recommendation.upsert({ where: { name: "It's Time" }, update: { ...itsTime }, create: { ...itsTime } })
-    await prisma.recommendation.upsert({ where: { name: "Demons" }, update: { ...demons }, create: { ...demons } })
+    await prisma.recommendation.upsert({ where: { name: "On Top of The World" }, update: {}, create: { ...onTopOfTheWorld } })
+    await prisma.recommendation.upsert({ where: { name: "It's Time" }, update: {}, create: { ...itsTime } })
+    await prisma.recommendation.upsert({ where: { name: "Demons" }, update: {}, create: { ...demons } })
 }
 
 main()
