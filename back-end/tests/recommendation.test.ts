@@ -61,6 +61,19 @@ describe('POST /recommendations/:id/downvote', () => {
     })
 })
 
+describe('GET /recommendations', () => {
+    it('given an array of recommendations, return 200', async () => {
+        const recommendations = await recommendationFactory.recommendationsLimit10()
+
+        const result = await supertest(app).get('/recommendations')
+
+        expect(result.status).toBe(200)
+        expect(result.body).toBeInstanceOf(Array)
+        expect(result.body).toEqual(expect.objectContaining(recommendations))
+        expect(result.body.length).toBeLessThanOrEqual(10)
+    })
+})
+
 afterAll(async () => {
     await prisma.$disconnect()
 })

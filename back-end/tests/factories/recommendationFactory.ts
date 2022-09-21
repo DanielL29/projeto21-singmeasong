@@ -1,7 +1,8 @@
 import { faker } from '@faker-js/faker'
 import { Recommendation } from '@prisma/client'
 import { prisma } from '../../src/database'
-import { CreateRecommendationData } from '../services/recommendationsService'
+import { recommendationRepository } from '../../src/repositories/recommendationRepository'
+import { CreateRecommendationData } from '../../src/services/recommendationsService'
 
 export function createRecommendation(): CreateRecommendationData {
     const recommendation = {
@@ -29,4 +30,10 @@ export function wrongRecommendationLink(): CreateRecommendationData {
     }
 
     return recommendation
+}
+
+export async function recommendationsLimit10(): Promise<Recommendation[]> {
+    const recommendations: Recommendation[] = await recommendationRepository.findAll()
+
+    return recommendations
 }
