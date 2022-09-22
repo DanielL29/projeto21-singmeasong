@@ -70,12 +70,12 @@ export async function recommendationTop(qtd: number): Promise<Recommendation[]> 
     return recommendations
 }
 
-export async function recommendationDeleteDownvote(): Promise<number> {
+export async function recommendationDeleteDownvote(): Promise<Recommendation> {
     const recommendation: Recommendation = await insertRecommendation()
 
-    await prisma.recommendation.update({ where: { id: recommendation.id }, data: { score: -6 } })
+    const recommendationToDelete = await prisma.recommendation.update({ where: { id: recommendation.id }, data: { score: -6 } })
 
-    return recommendation.id
+    return recommendationToDelete
 }
 
 export async function findRecommendation(name: string): Promise<Recommendation | null> {

@@ -38,7 +38,7 @@ describe('POST /recommendations', () => {
 describe('POST /recommendations/:id/upvote', () => {
     it('expect to increase one to recommendation score', async () => {
         const recommendation = await recommendationFactory.insertRecommendation()
-        const expectedScore = 1
+        const EXPECTED_SCORE = 1
 
         jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(recommendation)
         jest.spyOn(recommendationRepository, 'updateScore').mockResolvedValueOnce(recommendation)
@@ -47,7 +47,7 @@ describe('POST /recommendations/:id/upvote', () => {
 
         expect(recommendationRepository.find).toHaveBeenCalledWith(recommendation.id)
         expect(recommendationRepository.updateScore).toHaveBeenCalledWith(recommendation.id, 'increment')
-        expect(recommendation.score).toBeLessThan(expectedScore)
+        expect(recommendation.score).toBeLessThan(EXPECTED_SCORE)
     })
 
     it('expect to not found recommendation id', async () => {
@@ -60,16 +60,42 @@ describe('POST /recommendations/:id/upvote', () => {
 })
 
 describe('POST /recommendations/:id/downvote', () => {
-    it('given a found id, return 200', async () => {
+    it('expect to increase one to recommendation score', async () => {
+        const recommendation = await recommendationFactory.insertRecommendation()
+        const EXPECTED_SCORE = -1
 
+        jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(recommendation)
+        jest.spyOn(recommendationRepository, 'updateScore').mockResolvedValueOnce(recommendation)
+
+        await expect(recommendationService.downvote(recommendation.id)).resolves.not.toThrow()
+
+        expect(recommendationRepository.find).toHaveBeenCalledWith(recommendation.id)
+        expect(recommendationRepository.updateScore).toHaveBeenCalledWith(recommendation.id, 'decrement')
+        expect(recommendation.score).toBeGreaterThan(EXPECTED_SCORE)
     })
 
-    it('given a not found id, return 404', async () => {
+    it('expect to not found recommendation id', async () => {
+        jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(null)
 
+        await expect(recommendationService.downvote(-1)).rejects.toEqual(notFoundError())
+
+        expect(recommendationRepository.find).toHaveBeenCalledWith(-1)
     })
 
-    it('given a downvote less than -5 delete a recommendation, return 404', async () => {
+    it('expect to delete a recommendation with score less than -5', async () => {
+        const recommendation = await recommendationFactory.recommendationDeleteDownvote()
+        const EXPECTED_SCORE = -5
 
+        jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(recommendation)
+        jest.spyOn(recommendationRepository, 'updateScore').mockResolvedValueOnce(recommendation)
+        jest.spyOn(recommendationRepository, 'remove').mockResolvedValueOnce()
+
+        await expect(recommendationService.downvote(recommendation.id)).resolves.not.toThrow()
+
+        expect(recommendationRepository.find).toHaveBeenCalledWith(recommendation.id)
+        expect(recommendationRepository.updateScore).toHaveBeenCalledWith(recommendation.id, 'decrement')
+        expect(recommendation.score).toBeLessThan(EXPECTED_SCORE)
+        expect(recommendationRepository.remove).toHaveBeenCalledWith(recommendation.id)
     })
 })
 
