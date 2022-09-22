@@ -2,7 +2,7 @@ import { prisma } from '../../src/database'
 import { recommendationService } from '../../src/services/recommendationsService'
 import { recommendationRepository } from '../../src/repositories/recommendationRepository'
 import * as recommendationFactory from '../factories/recommendationFactory'
-import { conflictError } from '../../src/utils/errorUtils'
+import { conflictError, notFoundError } from '../../src/utils/errorUtils'
 
 beforeEach(async () => {
     await prisma.$executeRaw`TRUNCATE TABLE "recommendations" RESTART IDENTITY`
@@ -36,12 +36,26 @@ describe('POST /recommendations', () => {
 })
 
 describe('POST /recommendations/:id/upvote', () => {
-    it('given a found id, return 200', async () => {
+    it('expect to increase one to recommendation score', async () => {
+        const recommendation = await recommendationFactory.insertRecommendation()
+        const expectedScore = 1
 
+        jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(recommendation)
+        jest.spyOn(recommendationRepository, 'updateScore').mockResolvedValueOnce(recommendation)
+
+        await expect(recommendationService.upvote(recommendation.id)).resolves.not.toThrow()
+
+        expect(recommendationRepository.find).toHaveBeenCalledWith(recommendation.id)
+        expect(recommendationRepository.updateScore).toHaveBeenCalledWith(recommendation.id, 'increment')
+        expect(recommendation.score).toBeLessThan(expectedScore)
     })
 
-    it('given a not found id, return 404', async () => {
+    it('expect to not found recommendation id', async () => {
+        jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(null)
 
+        await expect(recommendationService.upvote(-1)).rejects.toEqual(notFoundError())
+
+        expect(recommendationRepository.find).toHaveBeenCalledWith(-1)
     })
 })
 
