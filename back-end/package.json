@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/server.ts",
-    "test": "cross-env dotenv -e .env.test prisma migrate dev && cross-env dotenv -e .env.test prisma db seed && cross-env dotenv -e .env.test jest -i"
+    "test": "cross-env dotenv -e .env.test jest -i --coverage"
   },
   "prisma": {
     "seed": "ts-node ./prisma/seed.ts"
