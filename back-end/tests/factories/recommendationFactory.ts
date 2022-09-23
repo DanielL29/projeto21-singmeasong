@@ -15,7 +15,6 @@ export function __manyRecommendations() {
             youtubeLink: `https://www.youtube.com/watch?v=${faker.random.alphaNumeric(10)}`,
             score: faker.datatype.number(3)
         }
-        console.log(recommendations)
 
         if (i === 0) {
             hashNames[recommendation.name] = true
@@ -28,6 +27,10 @@ export function __manyRecommendations() {
     }
 
     return recommendations
+}
+
+export function __recommendationsOrderedByScore() {
+    return __manyRecommendations().sort((a: any, b: any) => b.score - a.score)
 }
 
 export function __baseRecommendation() {

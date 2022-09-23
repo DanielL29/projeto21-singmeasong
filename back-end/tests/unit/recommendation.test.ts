@@ -163,7 +163,17 @@ describe('GET /recommendations/random', () => {
 })
 
 describe('GET /recommendations/top/:amount', () => {
-    it('given a array of objects ordered by score passing amount, return 200', async () => {
+    it('expect an array of recommendations ordered by score or an empty array', async () => {
+        const recommendations = recommendationFactory.__recommendationsOrderedByScore()
+        const AMOUNT = 10
 
+        jest.spyOn(recommendationRepository, 'getAmountByScore').mockResolvedValueOnce(recommendations)
+
+        const topRecommendations = await recommendationService.getTop(AMOUNT)
+
+        expect(topRecommendations).toBeInstanceOf(Array)
+        expect(topRecommendations).toEqual(recommendations)
+        expect(topRecommendations.length).toEqual(AMOUNT)
+        expect(recommendationRepository.getAmountByScore).toHaveBeenCalledWith(AMOUNT)
     })
 })

@@ -4,7 +4,7 @@ import { prisma } from "../../src/database"
 import * as recommendationFactory from '../factories/recommendationFactory'
 
 beforeEach(async () => {
-    await prisma.$executeRaw`TRUNCATE TABLE "recommendations" RESTART IDENTITY`
+    await prisma.$executeRaw`TRUNCATE TABLE "recommendations"`
 })
 
 describe('POST /recommendations', () => {
@@ -74,10 +74,10 @@ describe('POST /recommendations/:id/downvote', () => {
     })
 
     it('given a downvote less than -5 delete a recommendation, return 404', async () => {
-        const recommendationId = await recommendationFactory.__recommendationDeleteDownvote()
+        const recommendation = await recommendationFactory.__recommendationDeleteDownvote()
 
-        await supertest(app).post(`/recommendations/${recommendationId}/downvote`)
-        const result = await supertest(app).post(`/recommendations/${recommendationId}/downvote`)
+        await supertest(app).post(`/recommendations/${recommendation.id}/downvote`)
+        const result = await supertest(app).post(`/recommendations/${recommendation.id}/downvote`)
 
         expect(result.status).toBe(404)
     })
