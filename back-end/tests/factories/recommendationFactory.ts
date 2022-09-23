@@ -4,35 +4,50 @@ import { prisma } from '../../src/database'
 import { recommendationRepository } from '../../src/repositories/recommendationRepository'
 import { CreateRecommendationData } from '../../src/services/recommendationsService'
 
-const manyRecommendations = [
-    {
-        name: "On Top of The World",
-        youtubeLink: "https://www.youtube.com/watch?v=w5tWYmIOWGk",
-        score: 120
-    },
-    {
-        name: "It's Time",
-        youtubeLink: "https://www.youtube.com/watch?v=sENM2wA_FTg",
-        score: 50
-    },
-    {
-        name: "Demons",
-        youtubeLink: "https://www.youtube.com/watch?v=mWRsgZuwf_8",
-        score: -30
-    }
-]
+export function __manyRecommendations() {
+    let recommendations: any = []
+    let hashNames: any = {}
 
-export function createRecommendation(): CreateRecommendationData {
-    const recommendation = {
+    for (let i = 0; i < 10; i++) {
+        const recommendation = {
+            id: i + 1,
+            name: faker.lorem.words(2),
+            youtubeLink: `https://www.youtube.com/watch?v=${faker.random.alphaNumeric(10)}`,
+            score: faker.datatype.number(3)
+        }
+        console.log(recommendations)
+
+        if (i === 0) {
+            hashNames[recommendation.name] = true
+            recommendations.push(recommendation)
+        } else {
+            if (!recommendations[recommendation.name]) {
+                recommendations.push(recommendation)
+            }
+        }
+    }
+
+    return recommendations
+}
+
+export function __baseRecommendation() {
+    return {
+        id: 1,
+        name: faker.lorem.words(2),
+        youtubeLink: `https://www.youtube.com/watch?v=${faker.random.alphaNumeric(10)}`,
+        score: 0
+    }
+}
+
+export function __createRecommendation(): CreateRecommendationData {
+    return {
         name: faker.lorem.words(2),
         youtubeLink: `https://www.youtube.com/watch?v=${faker.random.alphaNumeric(10)}`
     }
-
-    return recommendation
 }
 
-export async function insertRecommendation(): Promise<Recommendation> {
-    const recommendation: CreateRecommendationData = createRecommendation()
+export async function __insertRecommendation(): Promise<Recommendation> {
+    const recommendation: CreateRecommendationData = __createRecommendation()
 
     const insertedRecommendation = await prisma.recommendation.create({
         data: recommendation
@@ -41,7 +56,7 @@ export async function insertRecommendation(): Promise<Recommendation> {
     return insertedRecommendation
 }
 
-export function wrongRecommendationLink(): CreateRecommendationData {
+export function __wrongRecommendationLink(): CreateRecommendationData {
     const recommendation = {
         name: faker.lorem.words(2),
         youtubeLink: `not a link`
@@ -50,9 +65,9 @@ export function wrongRecommendationLink(): CreateRecommendationData {
     return recommendation
 }
 
-export async function recommendationsLimit10(): Promise<Recommendation[]> {
+export async function __recommendationsLimit10(): Promise<Recommendation[]> {
     await prisma.recommendation.createMany({
-        data: manyRecommendations
+        data: __manyRecommendations()
     })
 
     const recommendations: Recommendation[] = await recommendationRepository.findAll()
@@ -60,9 +75,9 @@ export async function recommendationsLimit10(): Promise<Recommendation[]> {
     return recommendations
 }
 
-export async function recommendationTop(qtd: number): Promise<Recommendation[]> {
+export async function __recommendationTop(qtd: number): Promise<Recommendation[]> {
     await prisma.recommendation.createMany({
-        data: manyRecommendations
+        data: __manyRecommendations()
     })
 
     const recommendations: Recommendation[] = await recommendationRepository.getAmountByScore(qtd)
@@ -70,15 +85,15 @@ export async function recommendationTop(qtd: number): Promise<Recommendation[]> 
     return recommendations
 }
 
-export async function recommendationDeleteDownvote(): Promise<Recommendation> {
-    const recommendation: Recommendation = await insertRecommendation()
+export async function __recommendationDeleteDownvote(): Promise<Recommendation> {
+    const recommendation: Recommendation = await __insertRecommendation()
 
     const recommendationToDelete = await prisma.recommendation.update({ where: { id: recommendation.id }, data: { score: -6 } })
 
     return recommendationToDelete
 }
 
-export async function findRecommendation(name: string): Promise<Recommendation | null> {
+export async function __findRecommendation(name: string): Promise<Recommendation | null> {
     const recommendation: Recommendation | null = await prisma.recommendation.findUnique({
         where: {
             name

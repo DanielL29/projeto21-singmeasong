@@ -1,16 +1,16 @@
-import { prisma } from '../../src/database'
 import { recommendationService } from '../../src/services/recommendationsService'
 import { recommendationRepository } from '../../src/repositories/recommendationRepository'
 import * as recommendationFactory from '../factories/recommendationFactory'
 import { conflictError, notFoundError } from '../../src/utils/errorUtils'
 
-beforeEach(async () => {
-    await prisma.$executeRaw`TRUNCATE TABLE "recommendations" RESTART IDENTITY`
+beforeEach(() => {
+    jest.resetAllMocks()
+    jest.clearAllMocks()
 })
 
 describe('POST /recommendations', () => {
     it('expect to name to be not found and create recommendation', async () => {
-        const recommendation = recommendationFactory.createRecommendation()
+        const recommendation = recommendationFactory.__baseRecommendation()
 
         jest.spyOn(recommendationRepository, 'findByName').mockResolvedValueOnce(null)
         jest.spyOn(recommendationRepository, 'create').mockResolvedValueOnce()
@@ -22,7 +22,7 @@ describe('POST /recommendations', () => {
     })
 
     it('expect to name to be found and dont create recommendation', async () => {
-        const recommendation = await recommendationFactory.insertRecommendation()
+        const recommendation = recommendationFactory.__baseRecommendation()
 
         jest.spyOn(recommendationRepository, 'findByName').mockResolvedValueOnce(recommendation)
 
@@ -37,7 +37,7 @@ describe('POST /recommendations', () => {
 
 describe('POST /recommendations/:id/upvote', () => {
     it('expect to increase one to recommendation score', async () => {
-        const recommendation = await recommendationFactory.insertRecommendation()
+        const recommendation = recommendationFactory.__baseRecommendation()
         const EXPECTED_SCORE = 1
 
         jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(recommendation)
@@ -56,12 +56,13 @@ describe('POST /recommendations/:id/upvote', () => {
         await expect(recommendationService.upvote(-1)).rejects.toEqual(notFoundError())
 
         expect(recommendationRepository.find).toHaveBeenCalledWith(-1)
+        expect(recommendationRepository.updateScore).not.toHaveBeenCalled()
     })
 })
 
 describe('POST /recommendations/:id/downvote', () => {
     it('expect to increase one to recommendation score', async () => {
-        const recommendation = await recommendationFactory.insertRecommendation()
+        const recommendation = recommendationFactory.__baseRecommendation()
         const EXPECTED_SCORE = -1
 
         jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(recommendation)
@@ -80,11 +81,13 @@ describe('POST /recommendations/:id/downvote', () => {
         await expect(recommendationService.downvote(-1)).rejects.toEqual(notFoundError())
 
         expect(recommendationRepository.find).toHaveBeenCalledWith(-1)
+        expect(recommendationRepository.updateScore).not.toHaveBeenCalled()
     })
 
     it('expect to delete a recommendation with score less than -5', async () => {
-        const recommendation = await recommendationFactory.recommendationDeleteDownvote()
+        const recommendation = recommendationFactory.__baseRecommendation()
         const EXPECTED_SCORE = -5
+        recommendation.score = -6
 
         jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(recommendation)
         jest.spyOn(recommendationRepository, 'updateScore').mockResolvedValueOnce(recommendation)
@@ -101,7 +104,15 @@ describe('POST /recommendations/:id/downvote', () => {
 
 describe('GET /recommendations', () => {
     it('given an array of recommendations, return 200', async () => {
+        const recommendations = recommendationFactory.__manyRecommendations()
 
+        jest.spyOn(recommendationRepository, 'findAll').mockResolvedValueOnce(recommendations)
+
+        const allRecommendations = await recommendationService.get()
+
+        expect(allRecommendations.length).toEqual(10)
+        expect(allRecommendations).toBeInstanceOf(Array)
+        expect(allRecommendations).toEqual(recommendations)
     })
 })
 
@@ -129,9 +140,4 @@ describe('GET /recommendations/top/:amount', () => {
     it('given a array of objects ordered by score passing amount, return 200', async () => {
 
     })
-})
-
-
-afterAll(async () => {
-    await prisma.$disconnect()
 })
