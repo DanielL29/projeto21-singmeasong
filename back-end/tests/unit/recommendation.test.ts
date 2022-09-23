@@ -117,12 +117,24 @@ describe('GET /recommendations', () => {
 })
 
 describe('GET /recommendations/:id', () => {
-    it('given a correct recommendation object on get, return 200', async () => {
+    it('expect to found id and a right recommendation', async () => {
+        const recommendation = recommendationFactory.__baseRecommendation()
 
+        jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(recommendation)
+
+        const findRecommendation = await recommendationService.getById(recommendation.id)
+
+        expect(findRecommendation).toEqual(recommendation)
+        expect(recommendationRepository.find).toHaveBeenCalledWith(recommendation.id)
     })
 
-    it('given a not found id, return 404', async () => {
+    it('expect to not found id and throw not found', async () => {
+        const recommendation = recommendationFactory.__baseRecommendation()
 
+        jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(null)
+
+        await expect(recommendationService.getById(recommendation.id)).rejects.toEqual(notFoundError())
+        expect(recommendationRepository.find).toHaveBeenCalledWith(recommendation.id)
     })
 })
 
