@@ -2,6 +2,7 @@ import { recommendationService } from '../../src/services/recommendationsService
 import { recommendationRepository } from '../../src/repositories/recommendationRepository'
 import * as recommendationFactory from '../factories/recommendationFactory'
 import { conflictError, notFoundError } from '../../src/utils/errorUtils'
+import { Recommendation } from '@prisma/client'
 
 beforeEach(() => {
     jest.resetAllMocks()
@@ -140,11 +141,24 @@ describe('GET /recommendations/:id', () => {
 
 describe('GET /recommendations/random', () => {
     it('given a correct random recommendation object, return 200', async () => {
+        const recommendations = recommendationFactory.__manyRecommendations()
 
+        jest.spyOn(recommendationRepository, 'findAll').mockResolvedValueOnce(recommendations)
+
+        const randomRecommendation = await recommendationService.getRandom()
+
+        expect(randomRecommendation).toBeInstanceOf(Object)
+        expect(recommendations).toContain(randomRecommendation)
+        expect(recommendationRepository.findAll).toHaveBeenCalled()
     })
 
     it('given a get and not found any recommendation on db, return 404', async () => {
+        jest.spyOn(recommendationRepository, 'findAll').mockResolvedValueOnce([])
+        jest.spyOn(recommendationRepository, 'findAll').mockResolvedValueOnce([])
 
+        await expect(recommendationService.getRandom).rejects.toEqual(notFoundError())
+
+        expect(recommendationRepository.findAll).toHaveBeenCalled()
     })
 })
 
