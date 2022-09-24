@@ -2,7 +2,6 @@ import { recommendationService } from '../../src/services/recommendationsService
 import { recommendationRepository } from '../../src/repositories/recommendationRepository'
 import * as recommendationFactory from '../factories/recommendationFactory'
 import { conflictError, notFoundError } from '../../src/utils/errorUtils'
-import { Recommendation } from '@prisma/client'
 
 beforeEach(() => {
     jest.resetAllMocks()

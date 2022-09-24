@@ -16,6 +16,10 @@
 // -- This is a child command --
 // Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
 //
+Cypress.Commands.add('createRecommendation', (recommendation) => {
+    cy.request('POST', 'http://localhost:5000/recommendations', recommendation).then(() => { })
+})
+
 //
 // -- This is a dual command --
 // Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
