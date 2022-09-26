@@ -7,8 +7,8 @@ import {
 
 const Loading = () => (
   <div>Loading...</div>
-  );
-  
+);
+
 const LazyWrapper = (Component) => (props) => (
   <Suspense fallback={<Loading />}>
     <Component {...props} />

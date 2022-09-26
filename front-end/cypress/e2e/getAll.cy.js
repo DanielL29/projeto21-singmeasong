@@ -1,12 +1,12 @@
-import { faker } from '@faker-js/faker'
+import { faker } from '@faker-js/faker';
 
 beforeEach(() => {
-  cy.request('POST', 'http://localhost:5000/e2e/reset', {})
-})
+  cy.request('POST', 'http://localhost:5000/e2e/reset', {});
+});
 
 describe('Get All Recommendations', () => {
   it('should get all(10) recommendations', () => {
-    let recommendations = []
+    let recommendations = [];
 
     for (let i = 0; i < 10; i++) {
       const recommendation = {
@@ -14,19 +14,19 @@ describe('Get All Recommendations', () => {
         youtubeLink: `https://www.youtube.com/watch?v=${faker.random.alphaNumeric(11)}`
       }
 
-      recommendations.push(recommendation)
+      recommendations.push(recommendation);
 
-      cy.createRecommendation(recommendation)
+      cy.createRecommendation(recommendation);
     }
 
-    cy.visit('http://localhost:3000')
+    cy.visit('http://localhost:3000');
 
-    cy.intercept('GET', `/recommendations`).as('getRecommendations')
+    cy.intercept('GET', `/recommendations`).as('getRecommendations');
 
-    cy.wait('@getRecommendations')
+    cy.wait('@getRecommendations');
 
     for (let i = 0; i < recommendations.length; i++) {
-      cy.get(`[data-cy-name="${recommendations[i].name}"]`).should('contain.text', recommendations[i].name)
+      cy.get(`[data-cy-name="${recommendations[i].name}"]`).should('contain.text', recommendations[i].name);
     }
-  })
-})
+  });
+});
