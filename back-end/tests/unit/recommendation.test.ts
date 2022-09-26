@@ -139,15 +139,31 @@ describe('GET /recommendations/:id', () => {
 })
 
 describe('GET /recommendations/random', () => {
-    it('given a correct random recommendation object, return 200', async () => {
+    it('given a correct random recommendation object with score less than or equal 10, return 200', async () => {
         const recommendations = recommendationFactory.__manyRecommendations()
 
         jest.spyOn(recommendationRepository, 'findAll').mockResolvedValueOnce(recommendations)
+        jest.spyOn(Math, 'random').mockReturnValue(0.7)
 
         const randomRecommendation = await recommendationService.getRandom()
 
         expect(randomRecommendation).toBeInstanceOf(Object)
         expect(recommendations).toContain(randomRecommendation)
+        expect(Math.random).toHaveBeenCalled()
+        expect(recommendationRepository.findAll).toHaveBeenCalled()
+    })
+
+    it('given a correct random recommendation object with score greater than, return 200', async () => {
+        const recommendations = recommendationFactory.__manyRecommendations()
+
+        jest.spyOn(recommendationRepository, 'findAll').mockResolvedValueOnce(recommendations)
+        jest.spyOn(Math, 'random').mockReturnValue(0.6)
+
+        const randomRecommendation = await recommendationService.getRandom()
+
+        expect(randomRecommendation).toBeInstanceOf(Object)
+        expect(recommendations).toContain(randomRecommendation)
+        expect(Math.random).toHaveBeenCalled()
         expect(recommendationRepository.findAll).toHaveBeenCalled()
     })
 

@@ -3,7 +3,7 @@ import { prisma } from "../database";
 import { CreateRecommendationData } from "../services/recommendationsService";
 
 async function create(createRecommendationData: CreateRecommendationData) {
-  return prisma.recommendation.create({
+  await prisma.recommendation.create({
     data: createRecommendationData,
   });
 }
