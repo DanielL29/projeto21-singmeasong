@@ -13,11 +13,15 @@ describe('Get Random Recommendation', () => {
 
     cy.createRecommendation(recommendation);
 
-    cy.visit('http://localhost:3000/random');
+    cy.visit('http://localhost:3000');
 
-    cy.intercept('GET', `/recommendations/random`).as('getRandomRecommendation');
+    cy.intercept('GET', `/recommendations`).as('getRecommendation');
 
-    cy.wait('@getRandomRecommendation');
+    cy.get('[data-cy-nav=random]').click();
+
+    cy.wait('@getRecommendation');
+
+    cy.url().should('eq', 'http://localhost:3000/random');
 
     cy.get(`[data-cy-name="${recommendation.name}"]`).should('contain.text', recommendation.name);
   })
